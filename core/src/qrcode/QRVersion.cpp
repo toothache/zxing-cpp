@@ -658,6 +658,13 @@ const Version* Version::DecodeVersionInformation(int versionBitsA, int versionBi
 	return nullptr;
 }
 
+int Version::GetVersionBits(int number)
+{
+	if (number < 7)
+		return 0;
+	return VERSION_DECODE_INFO[number - 7];
+}
+
 /**
 * See ISO 18004:2006 Annex E
 */

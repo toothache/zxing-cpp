@@ -46,6 +46,7 @@ public:
 	bool isModel2() const { return type() == Type::Model2; }
 
 	int versionNumber() const { return _versionNumber; }
+	int versionBits() const { return GetVersionBits(_versionNumber); }
 
 	const std::vector<int>& alignmentPatternCenters() const { return _alignmentPatternCenters; }
 
@@ -111,6 +112,8 @@ public:
 	static const Version* Model2(int number);
 	static const Version* Micro(int number);
 	static const Version* rMQR(int number);
+
+	static int GetVersionBits(int number);
 
 private:
 	int _versionNumber;

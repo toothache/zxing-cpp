@@ -343,6 +343,25 @@ static const Version* ReadVersion(const BitMatrix& image, int dimension, const P
 	return Version::DecodeVersionInformation(bits[0], bits[1]);
 }
 
+static DetectorResult CorrectVersionBits(const DetectorResult& result, const Version* version)
+{
+	int dimension = version->dimension();
+
+	auto position = result.position();
+	auto bits = result.bits().copy();
+	for (bool mirror : {false, true}) {
+		int versionBits = version->versionBits();
+		for (int y = 0; y <= 5; ++y)
+			for (int x = dimension - 11; x <= dimension - 9; ++x) {
+				auto mod = mirror ? PointI{y, x} : PointI{x, y};
+				bits.set(mod, versionBits & 0x1);
+				versionBits >>= 1;
+			}
+	}
+
+	return DetectorResult(std::move(bits), std::move(position));
+}
+
 DetectorResult SampleQR(const BitMatrix& image, const FinderPatternSet& fp)
 {
 	auto top  = EstimateDimension(image, fp.tl, fp.tr);
@@ -500,7 +519,8 @@ DetectorResult SampleQR(const BitMatrix& image, const FinderPatternSet& fp)
 													 {*apP(x, y), *apP(x + 1, y), *apP(x + 1, y + 1), *apP(x, y + 1)}}});
 			}
 
-		return SampleGrid(image, dimension, dimension, rois);
+		auto detResult = SampleGrid(image, dimension, dimension, rois);
+		return CorrectVersionBits(detResult, version);
 #endif
 	}
 
